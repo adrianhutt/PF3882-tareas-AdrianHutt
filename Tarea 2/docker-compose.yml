@@ -1,0 +1,19 @@
+services:
+
+  usuarios:
+    build: ./usuarios-service
+    ports:
+      - "8001:8000"
+    restart: unless-stopped
+
+  reservas:
+    build: ./reservas-service
+    ports:
+      - "8002:8000"
+    restart: unless-stopped
+
+  analiticas:
+    build: ./analiticas-service
+    ports:
+      - "8003:8000"
+    restart: unless-stopped
