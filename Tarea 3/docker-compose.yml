@@ -1,0 +1,43 @@
+services:
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"   # management UI → http://localhost:15672  (guest/guest)
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  usuarios:
+    build: ./usuarios-service
+    ports:
+      - "8001:8000"
+    restart: unless-stopped
+
+  reservas:
+    build: ./reservas-service
+    ports:
+      - "8002:8000"
+    environment:
+      USUARIOS_URL: http://usuarios:8000
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq/
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      usuarios:
+        condition: service_started
+    restart: unless-stopped
+
+  analiticas:
+    build: ./analiticas-service
+    ports:
+      - "8003:8000"
+    environment:
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq/
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
